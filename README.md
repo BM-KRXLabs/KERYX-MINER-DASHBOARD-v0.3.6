@@ -78,6 +78,3 @@ The project is a monorepo containing:
 | **Database** | RocksDB |
 | **Build System** | Cargo, custom `build.js` script |
 
----
-
-## Project Structure
