@@ -1,0 +1,58 @@
+{
+  "name": "keryx-miner-dashboard",
+  "version": "0.3.6",
+  "description": "Keryx Miner Dashboard",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "author": "Keryx Labs",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "build": {
+    "appId": "com.keryx.miner-dashboard",
+    "productName": "Keryx Miner Dashboard",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "**/*",
+      "!node_modules/.cache",
+      "!*.log",
+      "!*.map",
+      "!build.js",
+      "!miner-node",
+      "!keryxd",
+      "!target",
+      "!Cargo.toml",
+      "!Cargo.lock",
+      "!**/*.rs"
+    ],
+    "extraResources": [
+      {
+        "from": "bin/",
+        "to": "bin/",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
