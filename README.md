@@ -1,196 +1,83 @@
-# Keryx Node
+# Keryx Miner — OPoI Dashboard
 
-A lightweight and high-performance node implementation for the **Keryx** network, running at **10 blocks per second (10 BPS)**.
+[![License](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![Rust](https://img.shields.io/badge/rust-1.88.0%2B-orange)](https://www.rust-lang.org/)
+[![CUDA](https://img.shields.io/badge/CUDA-12.x-green)](https://developer.nvidia.com/cuda-toolkit)
+[![Electron](https://img.shields.io/badge/Electron-28.x-47848F)](https://electronjs.org/)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-Keryx is the first **BlockDAG** ecosystem purpose-built for decentralized AI inference. 
-
-By combining high-throughput GHOSTDAG architecture with optimistic verifiability, we are building a sovereign, censorship-resistant intelligence infrastructure.
-
-## KeryxHash: Unique Proof-of-Work
-
-Keryx utilizes KeryxHash, a specialized PoW algorithm evolved from kHeavyHash, specifically optimized for GPU efficiency and network security:
-
-ASIC Isolation: Implementation of KERYX_MATRIX_SALT, a 32-byte domain-specific salt that isolates the network from existing Kaspa ASICs.
-
-WaveMix Technology: A 4-round ARX (Add-Rotate-Xor) post-processing step designed to increase GPU register pressure, favoring consumer hardware.
-
-Security Mutation: Re-engineered consensus validation layers to ensure unique block signing.
+**Keryx Miner** is a next-generation GPU mining dashboard for the Keryx blockchain, combining traditional Proof-of-Work (PoW) mining with **Optimized Proof of Inference (OPoI)** — a novel consensus mechanism that rewards on-chain AI inference workloads. This Electron-based desktop application provides a polished, real-time interface for monitoring and controlling the Keryx mining node and its integrated inference engine.
 
 ---
 
-## Installation
-  <details>
-  <summary>Building on Linux</summary>
+---
 
-  1. Install general prerequisites
+## Overview
 
-      ```bash
-      sudo apt install curl git build-essential libssl-dev pkg-config
-      ```
+Keryx Miner is the official desktop client for the Keryx blockchain network. It provides:
 
-  2. Install Protobuf (required for gRPC)
+- **GPU‑accelerated mining** using CUDA kernels
+- **OPoI (Optimized Proof of Inference)** — mine by performing useful AI inference workloads
+- **Real‑time dashboard** with hashrate charts, GPU stats, and block discovery animations
+- **Integrated daemon** (`keryxd`) and miner (`keryx-miner`) processes
+- **Settings management** with persistent user configuration
+- **Web‑based inference window** for submitting AI tasks
 
-      ```bash
-      sudo apt install protobuf-compiler libprotobuf-dev #Required for gRPC
-      ```
-  3. Install the clang toolchain (required for RocksDB and WASM secp256k1 builds)
-
-      ```bash
-      sudo apt-get install clang-format clang-tidy \
-      clang-tools clang clangd libc++-dev \
-      libc++1 libc++abi-dev libc++abi1 \
-      libclang-dev libclang1 liblldb-dev \
-      libllvm-ocaml-dev libomp-dev libomp5 \
-      lld lldb llvm-dev llvm-runtime \
-      llvm python3-clang
-      ```
-  4. Install the [rust toolchain](https://rustup.rs/)
-
-     If you already have rust installed, update it by running: `rustup update`
-  5. Install wasm-pack
-      ```bash
-      cargo install wasm-pack
-      ```
-  6. Install wasm32 target
-      ```bash
-      rustup target add wasm32-unknown-unknown
-      ```
-  7. Clone the repo
-      ```bash
-      git clone https://github.com/Keryx-labs/keryx-node
-      cd keryx-node
-      ```
-  8. Build the node
-      ```bash
-      cargo build --release
-      ```
-  </details>
-
-
-
-  <details>
-  <summary>Building on Windows</summary>
-
-
-  1. [Install Git for Windows](https://gitforwindows.org/) or an alternative Git distribution.
-
-  2. Install [Protocol Buffers](https://github.com/protocolbuffers/protobuf/releases/download/v21.10/protoc-21.10-win64.zip) and add the `bin` directory to your `Path`
-
-
-3. Install [LLVM-15.0.6-win64.exe](https://github.com/llvm/llvm-project/releases/download/llvmorg-15.0.6/LLVM-15.0.6-win64.exe)
-
-    Add the `bin` directory of the LLVM installation (`C:\Program Files\LLVM\bin`) to PATH
-
-    set `LIBCLANG_PATH` environment variable to point to the `bin` directory as well
-
-    **IMPORTANT:** Due to C++ dependency configuration issues, LLVM `AR` installation on Windows may not function correctly when switching between WASM and native C++ code compilation (native `RocksDB+secp256k1` vs WASM32 builds of `secp256k1`). Unfortunately, manually setting `AR` environment variable also confuses C++ build toolchain (it should not be set for native but should be set for WASM32 targets). Currently, the best way to address this, is as follows: after installing LLVM on Windows, go to the target `bin` installation directory and copy or rename `LLVM_AR.exe` to `AR.exe`.
-
-  4. Install the [rust toolchain](https://rustup.rs/)
-
-     If you already have rust installed, update it by running: `rustup update`
-  5. Install wasm-pack
-      ```bash
-      cargo install wasm-pack
-      ```
-  6. Install wasm32 target
-      ```bash
-      rustup target add wasm32-unknown-unknown
-      ```
-  7. Clone the repo
-      ```bash
-      git clone https://github.com/Keryx-labs/keryx-node
-      cd keryx-node
-      ```
-  8. Build the node
-      ```bash
-      cargo build --release
-      ```
- </details>
-
-
-  <details>
-  <summary>Building on Mac OS</summary>
-
-
-  1. Install Protobuf (required for gRPC)
-      ```bash
-      brew install protobuf
-      ```
-  2. Install llvm.
-
-      The default XCode installation of `llvm` does not support WASM build targets.
-To build WASM on MacOS you need to install `llvm` from homebrew (at the time of writing, the llvm version for MacOS is 16.0.1).
-      ```bash
-      brew install llvm
-      ```
-
-      **NOTE:** Homebrew can use different keg installation locations depending on your configuration. For example:
-      - `/opt/homebrew/opt/llvm` -> `/opt/homebrew/Cellar/llvm/16.0.1`
-      - `/usr/local/Cellar/llvm/16.0.1`
-
-      To determine the installation location you can use `brew list llvm` command and then modify the paths below accordingly:
-      ```bash
-      % brew list llvm
-      /usr/local/Cellar/llvm/16.0.1/bin/FileCheck
-      /usr/local/Cellar/llvm/16.0.1/bin/UnicodeNameMappingGenerator
-      ...
-      ```
-      If you have `/opt/homebrew/Cellar`, then you should be able to use `/opt/homebrew/opt/llvm`.
-
-      Add the following to your `~/.zshrc` file:
-      ```bash
-      export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
-      export LDFLAGS="-L/opt/homebrew/opt/llvm/lib"
-      export CPPFLAGS="-I/opt/homebrew/opt/llvm/include"
-      export AR=/opt/homebrew/opt/llvm/bin/llvm-ar
-      ```
-
-      Reload the `~/.zshrc` file
-      ```bash
-      source ~/.zshrc
-      ```
-  3. Install the [rust toolchain](https://rustup.rs/)
-
-     If you already have rust installed, update it by running: `rustup update`
-  4. Install wasm-pack
-      ```bash
-      cargo install wasm-pack
-      ```
-  5. Install wasm32 target
-      ```bash
-      rustup target add wasm32-unknown-unknown
-      ```
-  6. Clone the repo
-      ```bash
-      git clone https://github.com/Keryx-labs/keryx-node
-      cd keryx-node
-      ```
-  8. Build the node
-      ```bash
-      cargo build --release
-      ```
- </details>
-
-## Running the Node
-
-Start a node
-
-```bash
-./target/release/keryxd
-```
-
-## Common options
-
-```bash
-./target/release/keryxd --help
-```
-
-## Connect with us
-
-* **Website:** [keryx-labs.com](https://keryx-labs.com)
-* **X (Twitter):** [@Keryx_Labs](https://x.com/Keryx_Labs)
-* **Discord:** [Join the Community](https://discord.gg/U9eDmBUKTF)
+The project is a monorepo containing:
+- A **Rust workspace** with 50+ crates for the core blockchain and mining logic
+- An **Electron shell** that wraps the dashboard UI and spawns child processes
+- **CUDA kernels** for high‑performance mining and inference
 
 ---
 
-> "Intelligence is the message. Keryx is the messenger."
+## Key Features
+
+### 🚀 Mining
+- **Multi‑GPU support** — leverages all available NVIDIA GPUs
+- **Real‑time hashrate** monitoring with sparkline charts
+- **GPU telemetry** — temperature, power draw, VRAM usage
+- **Automatic block detection** with celebratory visual effects
+
+### 🧠 OPoI Inference Mining
+- **On‑chain AI inference** — mine blocks while serving AI models
+- **Multiple model tiers** — from 1.7B to 70B parameter models:
+  - `very-light`: Qwen3‑1.7B
+  - `light`: Gemma‑3‑4B
+  - `default`: Dolphin‑3.0‑Llama‑3.1‑8B
+  - `high`: Qwen3‑32B
+  - `very-high`: Llama‑3.3‑70B
+- **Inference request counter** tracks OPoI completions
+
+### 🖥️ Dashboard UI
+- **Cyberpunk‑inspired dark theme** with animated backgrounds
+- **Live network stats** from the Keryx API (hashrate, blocks, supply, DAA)
+- **Interactive 3D visualizations** — rotating K logo, particle systems, shockwave effects
+- **Dual log panels** — separate daemon and miner output
+- **Settings modal** for configuring binary paths, mining addresses, and model tier
+
+### 🔧 Developer Experience
+- **Single‑command build** (`node build.js`) that locates MSVC, Windows SDK, and CUDA
+- **Workspace‑aware Cargo** with optimized release profiles
+- **Comprehensive logging** with log level parsing
+- **IPC bridge** between Electron and renderer processes
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend UI** | HTML5, CSS3, Vanilla JS, Canvas API |
+| **Desktop Shell** | Electron 28.x |
+| **Backend Runtime** | Rust 1.88.0 (stable) |
+| **Blockchain Core** | Keryx workspace (50+ crates) |
+| **GPU Acceleration** | CUDA 12.x, NVCC |
+| **RPC Framework** | Tonic (gRPC), Prost, Tower |
+| **Serialization** | Borsh, Serde, Prost |
+| **Crypto** | Secp256k1, SHA‑2/3, Blake2b, Keccak |
+| **Database** | RocksDB |
+| **Build System** | Cargo, custom `build.js` script |
+
+---
+
+## Project Structure
